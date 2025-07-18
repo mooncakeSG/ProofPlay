@@ -1,5 +1,5 @@
-import React, {createContext, useContext, useState, useEffect} from 'react';
-import {Alert} from 'react-native';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Alert } from 'react-native';
 
 // XION SDK imports (these would be the actual imports when SDK is available)
 // import {XionMobileSDK} from '@xionlabs/xion-mobile-sdk';
@@ -67,8 +67,8 @@ class MockXionMobileSDK implements XionMobileSDK {
 
   async connectWallet(): Promise<WalletInfo> {
     // Simulate wallet connection
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     const walletInfo: WalletInfo = {
       address: '0x' + Math.random().toString(16).substr(2, 40),
       chainId: 'xion-1',
@@ -85,10 +85,12 @@ class MockXionMobileSDK implements XionMobileSDK {
     return walletInfo;
   }
 
-  async connectSocial(provider: 'google' | 'apple' | 'facebook'): Promise<SocialInfo> {
+  async connectSocial(
+    provider: 'google' | 'apple' | 'facebook'
+  ): Promise<SocialInfo> {
     // Simulate social login
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     const socialInfo: SocialInfo = {
       userId: 'user_' + Math.random().toString(16).substr(2, 8),
       email: `user@${provider}.com`,
@@ -122,10 +124,10 @@ class MockXionMobileSDK implements XionMobileSDK {
 
   async verifyProof(proofData: ProofData): Promise<VerificationResult> {
     // Simulate zkTLS verification
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     const success = Math.random() > 0.2; // 80% success rate for demo
-    
+
     if (success) {
       return {
         success: true,
@@ -155,10 +157,12 @@ interface XionAuthContextType {
 }
 
 // Create context
-const XionAuthContext = createContext<XionAuthContextType | undefined>(undefined);
+const XionAuthContext = createContext<XionAuthContextType | undefined>(
+  undefined
+);
 
 // Provider component
-export const XionAuthProvider: React.FC<{children: React.ReactNode}> = ({
+export const XionAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -173,7 +177,7 @@ export const XionAuthProvider: React.FC<{children: React.ReactNode}> = ({
           chainId: 'xion-1',
           rpcUrl: 'https://rpc.xion.burnt.com',
         });
-        
+
         // Check if user is already connected
         if (xionSDK.isConnected()) {
           setUser(xionSDK.getCurrentUser());
@@ -233,7 +237,9 @@ export const XionAuthProvider: React.FC<{children: React.ReactNode}> = ({
   };
 
   // Verify proof function
-  const verifyProof = async (proofData: ProofData): Promise<VerificationResult> => {
+  const verifyProof = async (
+    proofData: ProofData
+  ): Promise<VerificationResult> => {
     try {
       return await xionSDK.verifyProof(proofData);
     } catch (error) {
@@ -269,4 +275,4 @@ export const useXionAuth = (): XionAuthContextType => {
     throw new Error('useXionAuth must be used within a XionAuthProvider');
   }
   return context;
-}; 
+};

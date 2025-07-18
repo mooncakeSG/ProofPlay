@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {useXionAuth} from '../services/XionAuthService';
+import { useNavigation } from '@react-navigation/native';
+import { useXionAuth } from '../services/XionAuthService';
 
 // Challenge interface
 interface Challenge {
@@ -27,7 +27,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '1',
     title: 'Complete a 5K Run',
-    description: 'Run 5 kilometers and submit proof of completion. Track your route using any fitness app.',
+    description:
+      'Run 5 kilometers and submit proof of completion. Track your route using any fitness app.',
     category: 'Fitness',
     difficulty: 'Easy',
     reward: '50 XION tokens',
@@ -37,7 +38,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '2',
     title: 'Learn a New Programming Language',
-    description: 'Complete a beginner course in Python, JavaScript, or Rust. Submit your certificate or final project.',
+    description:
+      'Complete a beginner course in Python, JavaScript, or Rust. Submit your certificate or final project.',
     category: 'Education',
     difficulty: 'Medium',
     reward: '100 XION tokens',
@@ -47,7 +49,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '3',
     title: 'Volunteer for 10 Hours',
-    description: 'Volunteer at a local charity or community organization. Document your hours and activities.',
+    description:
+      'Volunteer at a local charity or community organization. Document your hours and activities.',
     category: 'Community',
     difficulty: 'Medium',
     reward: '75 XION tokens',
@@ -57,7 +60,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '4',
     title: 'Build a Smart Contract',
-    description: 'Create and deploy a simple smart contract on XION blockchain. Include basic functionality like token transfer.',
+    description:
+      'Create and deploy a simple smart contract on XION blockchain. Include basic functionality like token transfer.',
     category: 'Blockchain',
     difficulty: 'Hard',
     reward: '200 XION tokens',
@@ -67,7 +71,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '5',
     title: 'Read 5 Books in a Month',
-    description: 'Read 5 books from different genres and submit book reviews or reading logs.',
+    description:
+      'Read 5 books from different genres and submit book reviews or reading logs.',
     category: 'Education',
     difficulty: 'Medium',
     reward: '80 XION tokens',
@@ -77,7 +82,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '6',
     title: 'Create Digital Art',
-    description: 'Create an original digital artwork using any software. Submit the final piece and process screenshots.',
+    description:
+      'Create an original digital artwork using any software. Submit the final piece and process screenshots.',
     category: 'Creative',
     difficulty: 'Easy',
     reward: '60 XION tokens',
@@ -88,14 +94,17 @@ const CHALLENGES: Challenge[] = [
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
-  const {user, disconnect} = useXionAuth();
+  const { user, disconnect } = useXionAuth();
   const [refreshing, setRefreshing] = React.useState(false);
 
   // Handle challenge selection
   const handleChallengePress = (challenge: Challenge) => {
-    navigation.navigate('ChallengeDetail' as never, {
-      challengeId: challenge.id,
-    } as never);
+    navigation.navigate(
+      'ChallengeDetail' as never,
+      {
+        challengeId: challenge.id,
+      } as never
+    );
   };
 
   // Handle refresh
@@ -117,31 +126,39 @@ const HomeScreen: React.FC = () => {
   };
 
   // Render challenge item
-  const renderChallengeItem = ({item}: {item: Challenge}) => (
+  const renderChallengeItem = ({ item }: { item: Challenge }) => (
     <TouchableOpacity
       style={styles.challengeCard}
-      onPress={() => handleChallengePress(item)}>
+      onPress={() => handleChallengePress(item)}
+    >
       <View style={styles.challengeHeader}>
         <Text style={styles.challengeTitle}>{item.title}</Text>
-        <View style={[styles.difficultyBadge, styles[`${item.difficulty.toLowerCase()}Badge`]]}>
+        <View
+          style={[
+            styles.difficultyBadge,
+            styles[`${item.difficulty.toLowerCase()}Badge`],
+          ]}
+        >
           <Text style={styles.difficultyText}>{item.difficulty}</Text>
         </View>
       </View>
-      
+
       <Text style={styles.challengeDescription}>{item.description}</Text>
-      
+
       <View style={styles.challengeFooter}>
         <View style={styles.categoryContainer}>
           <Text style={styles.categoryText}>{item.category}</Text>
         </View>
-        
+
         <View style={styles.rewardContainer}>
           <Text style={styles.rewardText}>{item.reward}</Text>
         </View>
       </View>
-      
+
       <View style={styles.challengeMeta}>
-        <Text style={styles.participantsText}>{item.participants} participants</Text>
+        <Text style={styles.participantsText}>
+          {item.participants} participants
+        </Text>
         <Text style={styles.deadlineText}>Deadline: {item.deadline}</Text>
       </View>
     </TouchableOpacity>
@@ -166,7 +183,7 @@ const HomeScreen: React.FC = () => {
       <FlatList
         data={CHALLENGES}
         renderItem={renderChallengeItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -310,4 +327,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen; 
+export default HomeScreen;

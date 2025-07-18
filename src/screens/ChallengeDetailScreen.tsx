@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {useRoute, useNavigation} from '@react-navigation/native';
-import {useXionAuth} from '../services/XionAuthService';
+import { useRoute, useNavigation } from '@react-navigation/native';
+import { useXionAuth } from '../services/XionAuthService';
 
 // Challenge interface (same as HomeScreen)
 interface Challenge {
@@ -27,7 +27,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '1',
     title: 'Complete a 5K Run',
-    description: 'Run 5 kilometers and submit proof of completion. Track your route using any fitness app.',
+    description:
+      'Run 5 kilometers and submit proof of completion. Track your route using any fitness app.',
     category: 'Fitness',
     difficulty: 'Easy',
     reward: '50 XION tokens',
@@ -37,7 +38,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '2',
     title: 'Learn a New Programming Language',
-    description: 'Complete a beginner course in Python, JavaScript, or Rust. Submit your certificate or final project.',
+    description:
+      'Complete a beginner course in Python, JavaScript, or Rust. Submit your certificate or final project.',
     category: 'Education',
     difficulty: 'Medium',
     reward: '100 XION tokens',
@@ -47,7 +49,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '3',
     title: 'Volunteer for 10 Hours',
-    description: 'Volunteer at a local charity or community organization. Document your hours and activities.',
+    description:
+      'Volunteer at a local charity or community organization. Document your hours and activities.',
     category: 'Community',
     difficulty: 'Medium',
     reward: '75 XION tokens',
@@ -57,7 +60,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '4',
     title: 'Build a Smart Contract',
-    description: 'Create and deploy a simple smart contract on XION blockchain. Include basic functionality like token transfer.',
+    description:
+      'Create and deploy a simple smart contract on XION blockchain. Include basic functionality like token transfer.',
     category: 'Blockchain',
     difficulty: 'Hard',
     reward: '200 XION tokens',
@@ -67,7 +71,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '5',
     title: 'Read 5 Books in a Month',
-    description: 'Read 5 books from different genres and submit book reviews or reading logs.',
+    description:
+      'Read 5 books from different genres and submit book reviews or reading logs.',
     category: 'Education',
     difficulty: 'Medium',
     reward: '80 XION tokens',
@@ -77,7 +82,8 @@ const CHALLENGES: Challenge[] = [
   {
     id: '6',
     title: 'Create Digital Art',
-    description: 'Create an original digital artwork using any software. Submit the final piece and process screenshots.',
+    description:
+      'Create an original digital artwork using any software. Submit the final piece and process screenshots.',
     category: 'Creative',
     difficulty: 'Easy',
     reward: '60 XION tokens',
@@ -89,13 +95,13 @@ const CHALLENGES: Challenge[] = [
 const ChallengeDetailScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const {user} = useXionAuth();
-  
+  const { user } = useXionAuth();
+
   // Get challenge ID from route params
-  const {challengeId} = route.params as {challengeId: string};
-  
+  const { challengeId } = route.params as { challengeId: string };
+
   // Find the challenge by ID
-  const challenge = CHALLENGES.find(c => c.id === challengeId);
+  const challenge = CHALLENGES.find((c) => c.id === challengeId);
 
   // Handle submit proof navigation
   const handleSubmitProof = () => {
@@ -103,7 +109,7 @@ const ChallengeDetailScreen: React.FC = () => {
       Alert.alert('Error', 'You must be logged in to submit a proof');
       return;
     }
-    
+
     navigation.navigate('SubmitProof' as never);
   };
 
@@ -137,7 +143,12 @@ const ChallengeDetailScreen: React.FC = () => {
         {/* Title and Badge */}
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{challenge.title}</Text>
-          <View style={[styles.difficultyBadge, styles[`${challenge.difficulty.toLowerCase()}Badge`]]}>
+          <View
+            style={[
+              styles.difficultyBadge,
+              styles[`${challenge.difficulty.toLowerCase()}Badge`],
+            ]}
+          >
             <Text style={styles.difficultyText}>{challenge.difficulty}</Text>
           </View>
         </View>
@@ -164,10 +175,18 @@ const ChallengeDetailScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Requirements</Text>
           <View style={styles.requirementsList}>
-            <Text style={styles.requirementItem}>• Complete the challenge as described</Text>
-            <Text style={styles.requirementItem}>• Submit clear proof of completion</Text>
-            <Text style={styles.requirementItem}>• Meet the deadline: {challenge.deadline}</Text>
-            <Text style={styles.requirementItem}>• Proof will be verified using XION zkTLS</Text>
+            <Text style={styles.requirementItem}>
+              • Complete the challenge as described
+            </Text>
+            <Text style={styles.requirementItem}>
+              • Submit clear proof of completion
+            </Text>
+            <Text style={styles.requirementItem}>
+              • Meet the deadline: {challenge.deadline}
+            </Text>
+            <Text style={styles.requirementItem}>
+              • Proof will be verified using XION zkTLS
+            </Text>
           </View>
         </View>
 
@@ -187,7 +206,10 @@ const ChallengeDetailScreen: React.FC = () => {
         </View>
 
         {/* Submit Proof Button */}
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmitProof}>
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleSubmitProof}
+        >
           <Text style={styles.submitButtonText}>Submit Proof</Text>
         </TouchableOpacity>
       </View>
@@ -357,4 +379,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChallengeDetailScreen; 
+export default ChallengeDetailScreen;

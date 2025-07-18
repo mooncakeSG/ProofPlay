@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,12 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {useXionAuth} from '../services/XionAuthService';
+import { useNavigation } from '@react-navigation/native';
+import { useXionAuth } from '../services/XionAuthService';
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
-  const {user, isAuthenticated, isLoading, connectWallet, connectSocial} =
+  const { user, isAuthenticated, isLoading, connectWallet, connectSocial } =
     useXionAuth();
 
   // Navigate to main app if user is already authenticated
@@ -20,7 +20,7 @@ const LoginScreen: React.FC = () => {
     if (isAuthenticated && user) {
       navigation.reset({
         index: 0,
-        routes: [{name: 'Main' as never}],
+        routes: [{ name: 'Main' as never }],
       });
     }
   }, [isAuthenticated, user, navigation]);
@@ -35,7 +35,9 @@ const LoginScreen: React.FC = () => {
   };
 
   // Handle social login
-  const handleSocialLogin = async (provider: 'google' | 'apple' | 'facebook') => {
+  const handleSocialLogin = async (
+    provider: 'google' | 'apple' | 'facebook'
+  ) => {
     try {
       await connectSocial(provider);
     } catch (error) {
@@ -68,7 +70,8 @@ const LoginScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.button, styles.walletButton]}
           onPress={handleWalletConnect}
-          disabled={isLoading}>
+          disabled={isLoading}
+        >
           <Text style={styles.buttonText}>Connect Wallet</Text>
           <Text style={styles.buttonSubtext}>Use WalletConnect</Text>
         </TouchableOpacity>
@@ -84,7 +87,8 @@ const LoginScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.button, styles.googleButton]}
           onPress={() => handleSocialLogin('google')}
-          disabled={isLoading}>
+          disabled={isLoading}
+        >
           <Text style={[styles.buttonText, styles.googleButtonText]}>
             Continue with Google
           </Text>
@@ -93,7 +97,8 @@ const LoginScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.button, styles.appleButton]}
           onPress={() => handleSocialLogin('apple')}
-          disabled={isLoading}>
+          disabled={isLoading}
+        >
           <Text style={[styles.buttonText, styles.appleButtonText]}>
             Continue with Apple
           </Text>
@@ -102,7 +107,8 @@ const LoginScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.button, styles.facebookButton]}
           onPress={() => handleSocialLogin('facebook')}
-          disabled={isLoading}>
+          disabled={isLoading}
+        >
           <Text style={[styles.buttonText, styles.facebookButtonText]}>
             Continue with Facebook
           </Text>
@@ -232,4 +238,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen; 
+export default LoginScreen;

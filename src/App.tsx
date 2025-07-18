@@ -1,10 +1,10 @@
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {Text} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Text, StyleSheet } from 'react-native';
 
 // Import screens
 import LoginScreen from './screens/LoginScreen';
@@ -13,7 +13,7 @@ import ProofSubmissionScreen from './screens/ProofSubmissionScreen';
 import ChallengeDetailScreen from './screens/ChallengeDetailScreen';
 
 // Import XION SDK service
-import {XionAuthProvider} from './services/XionAuthService';
+import { XionAuthProvider } from './services/XionAuthService';
 
 // Define navigation types
 export type RootStackParamList = {
@@ -32,13 +32,22 @@ export type AuthStackParamList = {
 
 export type HomeStackParamList = {
   HomeScreen: undefined;
-  ChallengeDetail: {challengeId: string};
+  ChallengeDetail: { challengeId: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
 const HomeStack = createStackNavigator<HomeStackParamList>();
+
+// Tab icon components
+const ChallengesIcon = ({ color, size }: { color: string; size: number }) => (
+  <Text style={{ color, fontSize: size }}>📋</Text>
+);
+
+const SubmitProofIcon = ({ color, size }: { color: string; size: number }) => (
+  <Text style={{ color, fontSize: size }}>📤</Text>
+);
 
 // Main tab navigator
 const MainTabNavigator = () => {
@@ -48,27 +57,24 @@ const MainTabNavigator = () => {
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',
         headerShown: false,
-      }}>
-              <Tab.Screen
-          name="Home"
-          component={HomeStackNavigator}
-          options={{
-            tabBarLabel: 'Challenges',
-            tabBarIcon: ({color, size}) => (
-              <Text style={{color, fontSize: size}}>📋</Text>
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="SubmitProof"
-          component={ProofSubmissionScreen}
-          options={{
-            tabBarLabel: 'Submit Proof',
-            tabBarIcon: ({color, size}) => (
-              <Text style={{color, fontSize: size}}>📤</Text>
-            ),
-          }}
-        />
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeStackNavigator}
+        options={{
+          tabBarLabel: 'Challenges',
+          tabBarIcon: ChallengesIcon,
+        }}
+      />
+      <Tab.Screen
+        name="SubmitProof"
+        component={ProofSubmissionScreen}
+        options={{
+          tabBarLabel: 'Submit Proof',
+          tabBarIcon: SubmitProofIcon,
+        }}
+      />
     </Tab.Navigator>
   );
 };
@@ -80,12 +86,12 @@ const HomeStackNavigator = () => {
       <HomeStack.Screen
         name="HomeScreen"
         component={HomeScreen}
-        options={{title: 'Challenges'}}
+        options={{ title: 'Challenges' }}
       />
       <HomeStack.Screen
         name="ChallengeDetail"
         component={ChallengeDetailScreen}
-        options={{title: 'Challenge Details'}}
+        options={{ title: 'Challenge Details' }}
       />
     </HomeStack.Navigator>
   );
@@ -94,7 +100,7 @@ const HomeStackNavigator = () => {
 // Auth stack navigator
 const AuthStackNavigator = () => {
   return (
-    <AuthStack.Navigator screenOptions={{headerShown: false}}>
+    <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
     </AuthStack.Navigator>
   );
@@ -103,11 +109,11 @@ const AuthStackNavigator = () => {
 // Main App component
 const App = () => {
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
         <XionAuthProvider>
           <NavigationContainer>
-            <Stack.Navigator screenOptions={{headerShown: false}}>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Auth" component={AuthStackNavigator} />
               <Stack.Screen name="Main" component={MainTabNavigator} />
             </Stack.Navigator>
@@ -118,4 +124,10 @@ const App = () => {
   );
 };
 
-export default App; 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
+
+export default App;

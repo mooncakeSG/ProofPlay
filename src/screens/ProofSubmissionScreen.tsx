@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,9 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import DocumentPicker from 'react-native-document-picker';
-import {useXionAuth} from '../services/XionAuthService';
+import { useXionAuth } from '../services/XionAuthService';
 
 interface ProofFile {
   uri: string;
@@ -22,7 +22,7 @@ interface ProofFile {
 }
 
 const ProofSubmissionScreen: React.FC = () => {
-  const {user, verifyProof} = useXionAuth();
+  const { user, verifyProof } = useXionAuth();
   const [selectedFile, setSelectedFile] = useState<ProofFile | null>(null);
   const [challengeId, setChallengeId] = useState('');
   const [description, setDescription] = useState('');
@@ -153,7 +153,7 @@ const ProofSubmissionScreen: React.FC = () => {
 
       // Call XION zkTLS verification
       console.log('Submitting proof for verification:', proofData);
-      
+
       const verificationResult = await verifyProof(proofData);
 
       if (verificationResult.success) {
@@ -189,7 +189,9 @@ const ProofSubmissionScreen: React.FC = () => {
 
   // Format file size
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -221,39 +223,56 @@ const ProofSubmissionScreen: React.FC = () => {
       {/* File Upload Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Upload Proof</Text>
-        
+
         {!selectedFile ? (
           <View style={styles.uploadOptions}>
-            <TouchableOpacity style={styles.uploadButton} onPress={handleTakePhoto}>
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={handleTakePhoto}
+            >
               <Text style={styles.uploadButtonText}>📷 Take Photo</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.uploadButton} onPress={handleSelectImage}>
+
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={handleSelectImage}
+            >
               <Text style={styles.uploadButtonText}>🖼️ Select Image</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.uploadButton} onPress={handleSelectDocument}>
+
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={handleSelectDocument}
+            >
               <Text style={styles.uploadButtonText}>📄 Select Document</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.filePreview}>
             {selectedFile.type.startsWith('image/') ? (
-              <Image source={{uri: selectedFile.uri}} style={styles.imagePreview} />
+              <Image
+                source={{ uri: selectedFile.uri }}
+                style={styles.imagePreview}
+              />
             ) : (
               <View style={styles.documentPreview}>
                 <Text style={styles.documentIcon}>📄</Text>
                 <Text style={styles.documentName}>{selectedFile.name}</Text>
               </View>
             )}
-            
+
             <View style={styles.fileInfo}>
               <Text style={styles.fileName}>{selectedFile.name}</Text>
-              <Text style={styles.fileSize}>{formatFileSize(selectedFile.size)}</Text>
+              <Text style={styles.fileSize}>
+                {formatFileSize(selectedFile.size)}
+              </Text>
               <Text style={styles.fileType}>{selectedFile.type}</Text>
             </View>
-            
-            <TouchableOpacity style={styles.removeButton} onPress={handleRemoveFile}>
+
+            <TouchableOpacity
+              style={styles.removeButton}
+              onPress={handleRemoveFile}
+            >
               <Text style={styles.removeButtonText}>Remove</Text>
             </TouchableOpacity>
           </View>
@@ -280,11 +299,18 @@ const ProofSubmissionScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>XION zkTLS Verification</Text>
         <View style={styles.verificationInfo}>
           <Text style={styles.verificationText}>
-            Your proof will be verified using XION's zero-knowledge TLS (zkTLS) technology, ensuring:
+            Your proof will be verified using XION's zero-knowledge TLS (zkTLS)
+            technology, ensuring:
           </Text>
-          <Text style={styles.verificationBullet}>• Privacy-preserving verification</Text>
-          <Text style={styles.verificationBullet}>• Cryptographic proof of completion</Text>
-          <Text style={styles.verificationBullet}>• Immutable record on XION blockchain</Text>
+          <Text style={styles.verificationBullet}>
+            • Privacy-preserving verification
+          </Text>
+          <Text style={styles.verificationBullet}>
+            • Cryptographic proof of completion
+          </Text>
+          <Text style={styles.verificationBullet}>
+            • Immutable record on XION blockchain
+          </Text>
         </View>
       </View>
 
@@ -292,11 +318,20 @@ const ProofSubmissionScreen: React.FC = () => {
       <TouchableOpacity
         style={[
           styles.submitButton,
-          (!selectedFile || !challengeId.trim() || !description.trim() || isSubmitting) &&
+          (!selectedFile ||
+            !challengeId.trim() ||
+            !description.trim() ||
+            isSubmitting) &&
             styles.submitButtonDisabled,
         ]}
         onPress={handleSubmitProof}
-        disabled={!selectedFile || !challengeId.trim() || !description.trim() || isSubmitting}>
+        disabled={
+          !selectedFile ||
+          !challengeId.trim() ||
+          !description.trim() ||
+          isSubmitting
+        }
+      >
         {isSubmitting ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color="#ffffff" />
@@ -478,4 +513,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProofSubmissionScreen; 
+export default ProofSubmissionScreen;
