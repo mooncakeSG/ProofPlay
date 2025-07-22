@@ -1,196 +1,173 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
-  RefreshControl,
+  FlatList,
+  SafeAreaView,
+  StatusBar,
+  TextInput,
+  Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useXionAuth } from '../services/XionAuthService';
+import BottomNav from '../components/BottomNav';
 
-// Challenge interface
+const { width } = Dimensions.get('window');
+
 interface Challenge {
   id: string;
   title: string;
-  description: string;
+  level: 'Easy' | 'Medium' | 'Hard';
   category: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  reward: string;
-  deadline: string;
-  participants: number;
+  image: string;
+  status: 'trending' | 'newest' | 'in-progress' | 'completed';
 }
 
-// Hardcoded challenges data
-const CHALLENGES: Challenge[] = [
+const mockChallenges: Challenge[] = [
   {
     id: '1',
-    title: 'Complete a 5K Run',
-    description:
-      'Run 5 kilometers and submit proof of completion. Track your route using any fitness app.',
+    title: 'Complete 5K Run',
+    level: 'Easy',
     category: 'Fitness',
-    difficulty: 'Easy',
-    reward: '50 XION tokens',
-    deadline: '2024-02-15',
-    participants: 127,
+    image: '🏃‍♂️',
+    status: 'trending',
   },
   {
     id: '2',
-    title: 'Learn a New Programming Language',
-    description:
-      'Complete a beginner course in Python, JavaScript, or Rust. Submit your certificate or final project.',
-    category: 'Education',
-    difficulty: 'Medium',
-    reward: '100 XION tokens',
-    deadline: '2024-03-01',
-    participants: 89,
+    title: 'Learn React Native',
+    level: 'Hard',
+    category: 'Programming',
+    image: '💻',
+    status: 'newest',
   },
   {
     id: '3',
-    title: 'Volunteer for 10 Hours',
-    description:
-      'Volunteer at a local charity or community organization. Document your hours and activities.',
-    category: 'Community',
-    difficulty: 'Medium',
-    reward: '75 XION tokens',
-    deadline: '2024-02-28',
-    participants: 45,
+    title: 'Read 10 Books',
+    level: 'Medium',
+    category: 'Education',
+    image: '📚',
+    status: 'in-progress',
   },
   {
     id: '4',
-    title: 'Build a Smart Contract',
-    description:
-      'Create and deploy a simple smart contract on XION blockchain. Include basic functionality like token transfer.',
-    category: 'Blockchain',
-    difficulty: 'Hard',
-    reward: '200 XION tokens',
-    deadline: '2024-03-15',
-    participants: 23,
+    title: 'Create Digital Art',
+    level: 'Medium',
+    category: 'Creative',
+    image: '🎨',
+    status: 'completed',
   },
   {
     id: '5',
-    title: 'Read 5 Books in a Month',
-    description:
-      'Read 5 books from different genres and submit book reviews or reading logs.',
-    category: 'Education',
-    difficulty: 'Medium',
-    reward: '80 XION tokens',
-    deadline: '2024-02-29',
-    participants: 67,
+    title: 'Volunteer 20 Hours',
+    level: 'Easy',
+    category: 'Community',
+    image: '🤝',
+    status: 'trending',
   },
   {
     id: '6',
-    title: 'Create Digital Art',
-    description:
-      'Create an original digital artwork using any software. Submit the final piece and process screenshots.',
-    category: 'Creative',
-    difficulty: 'Easy',
-    reward: '60 XION tokens',
-    deadline: '2024-02-20',
-    participants: 156,
+    title: 'Build Smart Contract',
+    level: 'Hard',
+    category: 'Blockchain',
+    image: '⛓️',
+    status: 'newest',
   },
 ];
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user, disconnect } = useXionAuth();
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<'trending' | 'newest' | 'in-progress' | 'completed'>('trending');
 
-  // Handle challenge selection
-  const handleChallengePress = (challenge: Challenge) => {
-    navigation.navigate(
-      'ChallengeDetail' as never,
-      {
-        challengeId: challenge.id,
-      } as never
-    );
-  };
+  const filteredChallenges = mockChallenges.filter(challenge => {
+    const matchesSearch = challenge.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         challenge.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = challenge.status === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
 
-  // Handle refresh
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    // Simulate refresh
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  }, []);
-
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      await disconnect();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
-  // Render challenge item
-  const renderChallengeItem = ({ item }: { item: Challenge }) => (
+  const renderChallengeCard = ({ item }: { item: Challenge }) => (
     <TouchableOpacity
       style={styles.challengeCard}
-      onPress={() => handleChallengePress(item)}
+      onPress={() => navigation.navigate('ChallengeDetail' as never, { challengeId: item.id } as never)}
     >
-      <View style={styles.challengeHeader}>
-        <Text style={styles.challengeTitle}>{item.title}</Text>
-        <View
-          style={[
-            styles.difficultyBadge,
-            styles[`${item.difficulty.toLowerCase()}Badge`],
-          ]}
-        >
-          <Text style={styles.difficultyText}>{item.difficulty}</Text>
-        </View>
+      <View style={styles.cardImageContainer}>
+        <Text style={styles.cardImage}>{item.image}</Text>
       </View>
-
-      <Text style={styles.challengeDescription}>{item.description}</Text>
-
-      <View style={styles.challengeFooter}>
-        <View style={styles.categoryContainer}>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {item.title}
+        </Text>
+        <View style={styles.cardMeta}>
+          <View style={[styles.levelTag, styles[`level${item.level}`]]}>
+            <Text style={styles.levelText}>{item.level}</Text>
+          </View>
           <Text style={styles.categoryText}>{item.category}</Text>
         </View>
-
-        <View style={styles.rewardContainer}>
-          <Text style={styles.rewardText}>{item.reward}</Text>
-        </View>
-      </View>
-
-      <View style={styles.challengeMeta}>
-        <Text style={styles.participantsText}>
-          {item.participants} participants
-        </Text>
-        <Text style={styles.deadlineText}>Deadline: {item.deadline}</Text>
       </View>
     </TouchableOpacity>
   );
 
+  const FilterTab = ({ title, value, isActive }: { title: string; value: typeof activeFilter; isActive: boolean }) => (
+    <TouchableOpacity
+      style={[styles.filterTab, isActive && styles.filterTabActive]}
+      onPress={() => setActiveFilter(value)}
+    >
+      <Text style={[styles.filterTabText, isActive && styles.filterTabTextActive]}>
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.welcomeText}>Welcome back!</Text>
-          <Text style={styles.userText}>
-            {user?.name || user?.address?.slice(0, 8) + '...' || 'User'}
-          </Text>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
+        <Text style={styles.headerTitle}>Challenges</Text>
+        <TouchableOpacity style={styles.profileButton}>
+          <Text style={styles.profileEmoji}>👤</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Challenges List */}
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search challenges..."
+            placeholderTextColor="#999"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
+      {/* Filter Tabs */}
+      <View style={styles.filterContainer}>
+        <FilterTab title="Trending" value="trending" isActive={activeFilter === 'trending'} />
+        <FilterTab title="Newest" value="newest" isActive={activeFilter === 'newest'} />
+        <FilterTab title="In Progress" value="in-progress" isActive={activeFilter === 'in-progress'} />
+        <FilterTab title="Completed" value="completed" isActive={activeFilter === 'completed'} />
+      </View>
+
+      {/* Challenges Grid */}
       <FlatList
-        data={CHALLENGES}
-        renderItem={renderChallengeItem}
+        data={filteredChallenges}
+        renderItem={renderChallengeCard}
         keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
         showsVerticalScrollIndicator={false}
       />
-    </View>
+      
+      {/* Bottom Navigation */}
+      <BottomNav />
+    </SafeAreaView>
   );
 };
 
@@ -207,35 +184,86 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#f0f0f0',
   },
-  welcomeText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  userText: {
-    fontSize: 18,
-    fontWeight: '600',
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
     color: '#1a1a1a',
   },
-  logoutButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#ff3b30',
-    borderRadius: 8,
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  logoutText: {
-    fontSize: 12,
-    color: '#ffffff',
+  profileEmoji: {
+    fontSize: 20,
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#ffffff',
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  searchIcon: {
+    fontSize: 16,
+    marginRight: 8,
+    color: '#999',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  filterTab: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 12,
+    borderRadius: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  filterTabActive: {
+    backgroundColor: '#007AFF',
+  },
+  filterTabText: {
+    fontSize: 14,
     fontWeight: '500',
+    color: '#666',
+  },
+  filterTabTextActive: {
+    color: '#ffffff',
   },
   listContainer: {
-    padding: 16,
+    padding: 10,
+    paddingBottom: 120, // Account for bottom navigation
+  },
+  row: {
+    justifyContent: 'space-between',
   },
   challengeCard: {
+    width: (width - 40) / 2,
     backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
@@ -243,87 +271,55 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 3,
+    overflow: 'hidden',
   },
-  challengeHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+  cardImageContainer: {
+    height: 120,
+    backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  challengeTitle: {
-    fontSize: 18,
+  cardImage: {
+    fontSize: 48,
+  },
+  cardContent: {
+    padding: 16,
+  },
+  cardTitle: {
+    fontSize: 16,
     fontWeight: '600',
     color: '#1a1a1a',
-    flex: 1,
-    marginRight: 8,
-  },
-  difficultyBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  easyBadge: {
-    backgroundColor: '#d4edda',
-  },
-  mediumBadge: {
-    backgroundColor: '#fff3cd',
-  },
-  hardBadge: {
-    backgroundColor: '#f8d7da',
-  },
-  difficultyText: {
-    fontSize: 10,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  challengeDescription: {
-    fontSize: 14,
-    color: '#666',
+    marginBottom: 8,
     lineHeight: 20,
-    marginBottom: 12,
   },
-  challengeFooter: {
+  cardMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
-  categoryContainer: {
-    backgroundColor: '#f8f9fa',
+  levelTag: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 12,
+  },
+  levelEasy: {
+    backgroundColor: '#e8f5e8',
+  },
+  levelMedium: {
+    backgroundColor: '#fff3cd',
+  },
+  levelHard: {
+    backgroundColor: '#f8d7da',
+  },
+  levelText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   categoryText: {
     fontSize: 12,
     color: '#666',
-    fontWeight: '500',
-  },
-  rewardContainer: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  rewardText: {
-    fontSize: 12,
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-  challengeMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  participantsText: {
-    fontSize: 12,
-    color: '#999',
-  },
-  deadlineText: {
-    fontSize: 12,
-    color: '#999',
   },
 });
 

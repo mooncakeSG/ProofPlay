@@ -4,13 +4,17 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
 
 // Import screens
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import ProofSubmissionScreen from './screens/ProofSubmissionScreen';
 import ChallengeDetailScreen from './screens/ChallengeDetailScreen';
+import LessonDetailScreen from './screens/LessonDetailScreen';
+
+// Import components
+import BottomNav from './components/BottomNav';
 
 // Import XION SDK service
 import { XionAuthProvider } from './services/XionAuthService';
@@ -23,30 +27,42 @@ export type RootStackParamList = {
 
 export type MainTabParamList = {
   Home: undefined;
+  Quizzes: undefined;
+  Progress: undefined;
+  Profile: undefined;
   SubmitProof: undefined;
+  ChallengeDetail: { challengeId: string };
+  LessonDetail: { lessonId: string };
 };
 
 export type AuthStackParamList = {
   Login: undefined;
 };
 
-export type HomeStackParamList = {
-  HomeScreen: undefined;
-  ChallengeDetail: { challengeId: string };
-};
-
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
-const HomeStack = createStackNavigator<HomeStackParamList>();
 
-// Tab icon components
-const ChallengesIcon = ({ color, size }: { color: string; size: number }) => (
-  <Text style={{ color, fontSize: size }}>📋</Text>
+// Placeholder screens for new tabs
+const QuizzesScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Quizzes</Text>
+    <Text style={{ fontSize: 16, color: '#666', marginTop: 8 }}>Coming Soon</Text>
+  </View>
 );
 
-const SubmitProofIcon = ({ color, size }: { color: string; size: number }) => (
-  <Text style={{ color, fontSize: size }}>📤</Text>
+const ProgressScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Progress</Text>
+    <Text style={{ fontSize: 16, color: '#666', marginTop: 8 }}>Track your achievements</Text>
+  </View>
+);
+
+const ProfileScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Profile</Text>
+    <Text style={{ fontSize: 16, color: '#666', marginTop: 8 }}>Your account settings</Text>
+  </View>
 );
 
 // Main tab navigator
@@ -57,43 +73,17 @@ const MainTabNavigator = () => {
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',
         headerShown: false,
+        tabBarStyle: { display: 'none' }, // Hide default tab bar, we'll use custom BottomNav
       }}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeStackNavigator}
-        options={{
-          tabBarLabel: 'Challenges',
-          tabBarIcon: ChallengesIcon,
-        }}
-      />
-      <Tab.Screen
-        name="SubmitProof"
-        component={ProofSubmissionScreen}
-        options={{
-          tabBarLabel: 'Submit Proof',
-          tabBarIcon: SubmitProofIcon,
-        }}
-      />
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Quizzes" component={QuizzesScreen} />
+      <Tab.Screen name="Progress" component={ProgressScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="SubmitProof" component={ProofSubmissionScreen} />
+      <Tab.Screen name="ChallengeDetail" component={ChallengeDetailScreen} />
+      <Tab.Screen name="LessonDetail" component={LessonDetailScreen} />
     </Tab.Navigator>
-  );
-};
-
-// Home stack navigator
-const HomeStackNavigator = () => {
-  return (
-    <HomeStack.Navigator>
-      <HomeStack.Screen
-        name="HomeScreen"
-        component={HomeScreen}
-        options={{ title: 'Challenges' }}
-      />
-      <HomeStack.Screen
-        name="ChallengeDetail"
-        component={ChallengeDetailScreen}
-        options={{ title: 'Challenge Details' }}
-      />
-    </HomeStack.Navigator>
   );
 };
 
