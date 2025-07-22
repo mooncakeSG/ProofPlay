@@ -22,4 +22,12 @@ module.exports = {
   moduleNameMapper: {
     '^react-native$': 'react-native-web',
   },
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/android/',
+    '/ios/',
+  ],
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
+  },
 }; 
