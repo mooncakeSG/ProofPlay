@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -23,5 +26,6 @@
     "babel.config.js",
     "metro.config.js",
     "jest.config.js"
-  ]
-} 
+  ],
+  "extends": "expo/tsconfig.base"
+}

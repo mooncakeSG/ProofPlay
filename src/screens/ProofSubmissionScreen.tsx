@@ -10,8 +10,8 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import DocumentPicker from 'react-native-document-picker';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { useXionAuth } from '../services/XionAuthService';
 
 interface ProofFile {
@@ -32,16 +32,22 @@ const ProofSubmissionScreen: React.FC = () => {
   // Handle image selection from camera
   const handleTakePhoto = async () => {
     try {
-      const result = await launchCamera({
-        mediaType: 'photo',
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permission Required', 'Camera permission is required to take photos');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 0.8,
-        includeBase64: false,
+        allowsEditing: true,
       });
 
-      if (result.assets && result.assets[0]) {
+      if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
         setSelectedFile({
-          uri: asset.uri!,
+          uri: asset.uri,
           name: asset.fileName || 'photo.jpg',
           type: asset.type || 'image/jpeg',
           size: asset.fileSize || 0,
@@ -56,16 +62,22 @@ const ProofSubmissionScreen: React.FC = () => {
   // Handle image selection from gallery
   const handleSelectImage = async () => {
     try {
-      const result = await launchImageLibrary({
-        mediaType: 'photo',
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permission Required', 'Gallery permission is required to select images');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 0.8,
-        includeBase64: false,
+        allowsEditing: true,
       });
 
-      if (result.assets && result.assets[0]) {
+      if (!result.canceled && result.assets[0]) {
         const asset = result.assets[0];
         setSelectedFile({
-          uri: asset.uri!,
+          uri: asset.uri,
           name: asset.fileName || 'image.jpg',
           type: asset.type || 'image/jpeg',
           size: asset.fileSize || 0,
@@ -80,21 +92,22 @@ const ProofSubmissionScreen: React.FC = () => {
   // Handle document selection
   const handleSelectDocument = async () => {
     try {
-      const result = await DocumentPicker.pick({
+      const result = await DocumentPicker.getDocumentAsync({
         type: [
-          DocumentPicker.types.pdf,
-          DocumentPicker.types.doc,
-          DocumentPicker.types.docx,
-          DocumentPicker.types.txt,
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'text/plain',
         ],
+        copyToCacheDirectory: true,
       });
 
-      if (result[0]) {
-        const file = result[0];
+      if (!result.canceled && result.assets[0]) {
+        const file = result.assets[0];
         setSelectedFile({
           uri: file.uri,
           name: file.name,
-          type: file.type || 'application/octet-stream',
+          type: file.mimeType || 'application/octet-stream',
           size: file.size || 0,
         });
       }
