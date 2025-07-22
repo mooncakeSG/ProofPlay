@@ -11,86 +11,56 @@ import {
   Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { CompositeNavigationProp } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { MainTabParamList } from '../App';
 import BottomNav from '../components/BottomNav';
+import { useChallenges } from '../services/ChallengeService';
 
 const { width } = Dimensions.get('window');
 
-interface Challenge {
-  id: string;
-  title: string;
-  level: 'Easy' | 'Medium' | 'Hard';
-  category: string;
-  image: string;
-  status: 'trending' | 'newest' | 'in-progress' | 'completed';
-}
+// Use the Challenge interface from the service
+import { Challenge } from '../services/ChallengeService';
 
-const mockChallenges: Challenge[] = [
-  {
-    id: '1',
-    title: 'Complete 5K Run',
-    level: 'Easy',
-    category: 'Fitness',
-    image: '🏃‍♂️',
-    status: 'trending',
-  },
-  {
-    id: '2',
-    title: 'Learn React Native',
-    level: 'Hard',
-    category: 'Programming',
-    image: '💻',
-    status: 'newest',
-  },
-  {
-    id: '3',
-    title: 'Read 10 Books',
-    level: 'Medium',
-    category: 'Education',
-    image: '📚',
-    status: 'in-progress',
-  },
-  {
-    id: '4',
-    title: 'Create Digital Art',
-    level: 'Medium',
-    category: 'Creative',
-    image: '🎨',
-    status: 'completed',
-  },
-  {
-    id: '5',
-    title: 'Volunteer 20 Hours',
-    level: 'Easy',
-    category: 'Community',
-    image: '🤝',
-    status: 'trending',
-  },
-  {
-    id: '6',
-    title: 'Build Smart Contract',
-    level: 'Hard',
-    category: 'Blockchain',
-    image: '⛓️',
-    status: 'newest',
-  },
-];
+type HomeScreenNavigationProp = BottomTabNavigationProp<MainTabParamList, 'Home'>;
 
 const HomeScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const { challenges, userProgress, getChallenges, isLoading } = useChallenges();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'trending' | 'newest' | 'in-progress' | 'completed'>('trending');
+  const [displayChallenges, setDisplayChallenges] = useState<Challenge[]>([]);
 
-  const filteredChallenges = mockChallenges.filter(challenge => {
+  // Load challenges on mount
+  React.useEffect(() => {
+    loadChallenges();
+  }, []);
+
+  const loadChallenges = async () => {
+    const allChallenges = await getChallenges();
+    setDisplayChallenges(allChallenges);
+  };
+
+  const filteredChallenges = displayChallenges.filter(challenge => {
     const matchesSearch = challenge.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          challenge.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = challenge.status === activeFilter;
+    
+    // Map challenge status to filter
+    const userProgressItem = userProgress.find(p => p.challengeId === challenge.id);
+    let challengeStatus = 'trending';
+    if (userProgressItem) {
+      if (userProgressItem.status === 'completed') challengeStatus = 'completed';
+      else if (userProgressItem.status === 'in-progress') challengeStatus = 'in-progress';
+    }
+    
+    const matchesFilter = challengeStatus === activeFilter;
     return matchesSearch && matchesFilter;
   });
 
   const renderChallengeCard = ({ item }: { item: Challenge }) => (
     <TouchableOpacity
       style={styles.challengeCard}
-      onPress={() => navigation.navigate('ChallengeDetail' as never, { challengeId: item.id } as never)}
+      onPress={() => navigation.navigate('ChallengeDetail', { challengeId: item.id })}
     >
       <View style={styles.cardImageContainer}>
         <Text style={styles.cardImage}>{item.image}</Text>
@@ -100,8 +70,8 @@ const HomeScreen: React.FC = () => {
           {item.title}
         </Text>
         <View style={styles.cardMeta}>
-          <View style={[styles.levelTag, styles[`level${item.level}`]]}>
-            <Text style={styles.levelText}>{item.level}</Text>
+          <View style={[styles.levelTag, styles[`level${item.difficulty}`]]}>
+            <Text style={styles.levelText}>{item.difficulty}</Text>
           </View>
           <Text style={styles.categoryText}>{item.category}</Text>
         </View>

@@ -4,20 +4,23 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Text, StyleSheet, View } from 'react-native';
+import { Text, StyleSheet, View, ActivityIndicator } from 'react-native';
 
 // Import screens
 import LoginScreen from './screens/LoginScreen';
+import EmailAuthScreen from './screens/EmailAuthScreen';
 import HomeScreen from './screens/HomeScreen';
 import ProofSubmissionScreen from './screens/ProofSubmissionScreen';
 import ChallengeDetailScreen from './screens/ChallengeDetailScreen';
 import LessonDetailScreen from './screens/LessonDetailScreen';
+import FeatureTest from './components/FeatureTest';
 
 // Import components
 import BottomNav from './components/BottomNav';
 
 // Import XION SDK service
-import { XionAuthProvider } from './services/XionAuthService';
+import { XionAuthProvider, useXionAuth } from './services/XionAuthService';
+import { ChallengeProvider } from './services/ChallengeService';
 
 // Define navigation types
 export type RootStackParamList = {
@@ -33,10 +36,12 @@ export type MainTabParamList = {
   SubmitProof: undefined;
   ChallengeDetail: { challengeId: string };
   LessonDetail: { lessonId: string };
+  FeatureTest: undefined;
 };
 
 export type AuthStackParamList = {
   Login: undefined;
+  EmailAuth: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -83,6 +88,7 @@ const MainTabNavigator = () => {
       <Tab.Screen name="SubmitProof" component={ProofSubmissionScreen} />
       <Tab.Screen name="ChallengeDetail" component={ChallengeDetailScreen} />
       <Tab.Screen name="LessonDetail" component={LessonDetailScreen} />
+      <Tab.Screen name="FeatureTest" component={FeatureTest} />
     </Tab.Navigator>
   );
 };
@@ -92,6 +98,7 @@ const AuthStackNavigator = () => {
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen name="EmailAuth" component={EmailAuthScreen} />
     </AuthStack.Navigator>
   );
 };
@@ -102,21 +109,55 @@ const App = () => {
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
         <XionAuthProvider>
-          <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="Auth" component={AuthStackNavigator} />
-              <Stack.Screen name="Main" component={MainTabNavigator} />
-            </Stack.Navigator>
-          </NavigationContainer>
+          <ChallengeProvider>
+            <AppNavigator />
+          </ChallengeProvider>
         </XionAuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 };
 
+// App Navigator with authentication logic
+const AppNavigator = () => {
+  const { isAuthenticated, isLoading } = useXionAuth();
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <Stack.Screen name="Main" component={MainTabNavigator} />
+        ) : (
+          <Stack.Screen name="Auth" component={AuthStackNavigator} />
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#ffffff',
   },
 });
 

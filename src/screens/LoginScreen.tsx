@@ -123,16 +123,16 @@ const LoginScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.button, styles.emailButton]}
-          onPress={() => handleSocialLogin('google')} // Placeholder for email
-          disabled={isLoading}
-        >
-          <Text style={styles.emailButtonText}>✉️</Text>
-          <Text style={[styles.buttonText, styles.emailButtonText]}>
-            Continue with Email
-          </Text>
-        </TouchableOpacity>
+                       <TouchableOpacity
+                 style={[styles.button, styles.emailButton]}
+                 onPress={() => navigation.navigate('EmailAuth' as never)}
+                 disabled={isLoading}
+               >
+                 <Text style={styles.emailButtonText}>✉️</Text>
+                 <Text style={[styles.buttonText, styles.emailButtonText]}>
+                   Continue with Email
+                 </Text>
+               </TouchableOpacity>
 
         {/* Divider */}
         <View style={styles.divider}>

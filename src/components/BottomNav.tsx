@@ -42,6 +42,12 @@ const navItems: NavItem[] = [
     icon: '👤',
     route: 'Profile',
   },
+  {
+    id: 'test',
+    label: 'Test',
+    icon: '🧪',
+    route: 'FeatureTest',
+  },
 ];
 
 const BottomNav: React.FC = () => {
