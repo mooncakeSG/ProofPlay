@@ -1,0 +1,24 @@
+ProofPlay - Challenge Completion & Proof Verification App
+
+Description:
+ProofPlay is a revolutionary React Native app that integrates XION's Mobile Developer Kit for user authentication and proof verification using zkTLS technology. Complete challenges, submit proofs, and earn rewards in a secure, blockchain-powered environment.
+
+Key Features:
+• XION Authentication: Secure wallet connect and social login
+• Challenge Feed: Browse and complete various challenges
+• Proof Submission: Upload images or documents as proof
+• zkTLS Verification: Cryptographic proof verification
+• Modern UI: Clean, responsive design
+
+Keywords:
+blockchain,challenges,proof,verification,xion,zkTLS,authentication,rewards
+
+Category: Productivity
+Subcategory: Utilities
+
+Age Rating: 4+
+Content Rating: Everyone
+
+Support URL: https://github.com/mooncakeSG/ProofPlay
+Marketing URL: https://proofplay.app
+Privacy Policy URL: https://proofplay.app/privacy 
