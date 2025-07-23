@@ -9,13 +9,14 @@ import {
   StatusBar,
   TextInput,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from '../App';
 import BottomNav from '../components/BottomNav';
-import { useChallenges } from '../services/ChallengeService';
+import { apiService } from '../services/ApiService';
 
 const { width } = Dimensions.get('window');
 
@@ -26,10 +27,11 @@ type HomeScreenNavigationProp = BottomTabNavigationProp<MainTabParamList, 'Home'
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const { challenges, userProgress, getChallenges, isLoading } = useChallenges();
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<'trending' | 'newest' | 'in-progress' | 'completed'>('trending');
-  const [displayChallenges, setDisplayChallenges] = useState<Challenge[]>([]);
 
   // Load challenges on mount
   React.useEffect(() => {
@@ -37,22 +39,27 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   const loadChallenges = async () => {
-    const allChallenges = await getChallenges();
-    setDisplayChallenges(allChallenges);
+    try {
+      setLoading(true);
+      const response = await apiService.getChallenges();
+      if (response.success && response.data) {
+        setChallenges(response.data);
+      } else {
+        setError(response.error || 'Failed to load challenges');
+      }
+    } catch (err) {
+      setError('Failed to load challenges');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredChallenges = displayChallenges.filter(challenge => {
+  const filteredChallenges = challenges.filter((challenge: Challenge) => {
     const matchesSearch = challenge.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          challenge.category.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Map challenge status to filter
-    const userProgressItem = userProgress.find(p => p.challengeId === challenge.id);
-    let challengeStatus = 'trending';
-    if (userProgressItem) {
-      if (userProgressItem.status === 'completed') challengeStatus = 'completed';
-      else if (userProgressItem.status === 'in-progress') challengeStatus = 'in-progress';
-    }
-    
+    // For now, all challenges are trending (we'll add user progress later)
+    const challengeStatus = 'trending';
     const matchesFilter = challengeStatus === activeFilter;
     return matchesSearch && matchesFilter;
   });
@@ -106,13 +113,13 @@ const HomeScreen: React.FC = () => {
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search challenges..."
-            placeholderTextColor="#999"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
+                  <TextInput
+          style={styles.searchInput}
+          placeholder="Search challenges..."
+          placeholderTextColor="#666666"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
         </View>
       </View>
 
@@ -124,16 +131,36 @@ const HomeScreen: React.FC = () => {
         <FilterTab title="Completed" value="completed" isActive={activeFilter === 'completed'} />
       </View>
 
+      {/* Loading State */}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Loading challenges...</Text>
+        </View>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadChallenges}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Challenges Grid */}
-      <FlatList
-        data={filteredChallenges}
-        renderItem={renderChallengeCard}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-      />
+      {!loading && !error && (
+        <FlatList
+          data={filteredChallenges}
+          renderItem={renderChallengeCard}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
       
       {/* Bottom Navigation */}
       <BottomNav />
@@ -144,7 +171,7 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#1a1a1a',
   },
   header: {
     flexDirection: 'row',
@@ -152,65 +179,66 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1a1a1a',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: '#ffffff',
   },
   profileButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileEmoji: {
     fontSize: 20,
+    color: '#ffffff',
   },
   searchContainer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1a1a1a',
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 25,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   searchIcon: {
     fontSize: 16,
     marginRight: 8,
-    color: '#999',
+    color: '#cccccc',
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1a1a1a',
+    color: '#ffffff',
   },
   filterContainer: {
     flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1a1a1a',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   filterTab: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 12,
     borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   filterTabActive: {
     backgroundColor: '#007AFF',
@@ -218,7 +246,7 @@ const styles = StyleSheet.create({
   filterTabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
+    color: '#cccccc',
   },
   filterTabTextActive: {
     color: '#ffffff',
@@ -232,7 +260,7 @@ const styles = StyleSheet.create({
   },
   challengeCard: {
     width: (width - 40) / 2,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 16,
     marginBottom: 16,
     shadowColor: '#000',
@@ -244,10 +272,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   cardImageContainer: {
     height: 120,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -260,7 +290,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#ffffff',
     marginBottom: 8,
     lineHeight: 20,
   },
@@ -289,7 +319,42 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 12,
-    color: '#666',
+    color: '#cccccc',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+  },
+  loadingText: {
+    color: '#ffffff',
+    fontSize: 16,
+    marginTop: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+    padding: 20,
+  },
+  errorText: {
+    color: '#ff6b6b',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

@@ -23,10 +23,8 @@ const LoginScreen: React.FC = () => {
   // Navigate to main app if user is already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' as never }],
-      });
+      // The navigation will automatically handle the auth state change
+      // No need to manually navigate - the AppNavigator will handle it
     }
   }, [isAuthenticated, user, navigation]);
 

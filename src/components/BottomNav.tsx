@@ -7,46 +7,47 @@ import {
   Dimensions,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
 interface NavItem {
   id: string;
   label: string;
-  icon: string;
   route: string;
+  iconName: string;
 }
 
 const navItems: NavItem[] = [
   {
     id: 'home',
     label: 'Home',
-    icon: '🏠',
     route: 'Home',
+    iconName: 'home',
   },
   {
     id: 'quizzes',
     label: 'Quizzes',
-    icon: '📝',
     route: 'Quizzes',
+    iconName: 'book',
   },
   {
     id: 'progress',
     label: 'Progress',
-    icon: '📊',
     route: 'Progress',
+    iconName: 'bar-chart',
   },
   {
     id: 'profile',
     label: 'Profile',
-    icon: '👤',
     route: 'Profile',
+    iconName: 'person',
   },
   {
     id: 'test',
     label: 'Test',
-    icon: '🧪',
     route: 'FeatureTest',
+    iconName: 'flask',
   },
 ];
 
@@ -62,6 +63,18 @@ const BottomNav: React.FC = () => {
     if (!isActive(navItem)) {
       navigation.navigate(navItem.route as never);
     }
+  };
+
+  const renderIcon = (item: NavItem) => {
+    const isItemActive = isActive(item);
+    
+    return (
+      <Ionicons
+        name={item.iconName as any}
+        size={24}
+        color={isItemActive ? '#007AFF' : '#666666'}
+      />
+    );
   };
 
   return (
@@ -82,17 +95,12 @@ const BottomNav: React.FC = () => {
               styles.iconContainer,
               isActive(item) && styles.iconContainerActive,
             ]}>
-              <Text style={[
-                styles.icon,
-                isActive(item) && styles.iconActive,
-              ]}>
-                {item.icon}
-              </Text>
+              {renderIcon(item)}
             </View>
             <Text style={[
               styles.label,
               isActive(item) && styles.labelActive,
-            ]}>
+            ]} numberOfLines={1}>
               {item.label}
             </Text>
           </TouchableOpacity>
@@ -118,52 +126,49 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    backdropFilter: 'blur(20px)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.1)',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
   },
   navContainer: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingTop: 15,
+    flex: 1,
   },
   navItem: {
     alignItems: 'center',
+    justifyContent: 'center',
     flex: 1,
+    minWidth: 60,
   },
   iconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 4,
     backgroundColor: 'transparent',
   },
   iconContainerActive: {
-    backgroundColor: '#007AFF',
-    shadowColor: '#007AFF',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  icon: {
-    fontSize: 24,
-    color: '#666',
-  },
-  iconActive: {
-    color: '#ffffff',
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
-    color: '#666',
+    color: '#666666',
+    textAlign: 'center',
+    marginTop: 2,
   },
   labelActive: {
     color: '#007AFF',

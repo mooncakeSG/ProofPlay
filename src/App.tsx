@@ -13,6 +13,9 @@ import HomeScreen from './screens/HomeScreen';
 import ProofSubmissionScreen from './screens/ProofSubmissionScreen';
 import ChallengeDetailScreen from './screens/ChallengeDetailScreen';
 import LessonDetailScreen from './screens/LessonDetailScreen';
+import QuizzesScreen from './screens/QuizzesScreen';
+import ProgressScreen from './screens/ProgressScreen';
+import ProfileScreen from './screens/ProfileScreen';
 import FeatureTest from './components/FeatureTest';
 
 // Import components
@@ -48,27 +51,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const AuthStack = createStackNavigator<AuthStackParamList>();
 
-// Placeholder screens for new tabs
-const QuizzesScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Quizzes</Text>
-    <Text style={{ fontSize: 16, color: '#666', marginTop: 8 }}>Coming Soon</Text>
-  </View>
-);
-
-const ProgressScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Progress</Text>
-    <Text style={{ fontSize: 16, color: '#666', marginTop: 8 }}>Track your achievements</Text>
-  </View>
-);
-
-const ProfileScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Profile</Text>
-    <Text style={{ fontSize: 16, color: '#666', marginTop: 8 }}>Your account settings</Text>
-  </View>
-);
+// Placeholder screens removed - now using real screen components
 
 // Main tab navigator
 const MainTabNavigator = () => {
@@ -76,9 +59,11 @@ const MainTabNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: 'gray',
+        tabBarInactiveTintColor: '#666666',
         headerShown: false,
-        tabBarStyle: { display: 'none' }, // Hide default tab bar, we'll use custom BottomNav
+        tabBarStyle: { 
+          display: 'none' // Hide default tab bar, we'll use custom BottomNav
+        },
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
